@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a reproducible problem in Miora
+about: Report a reproducible problem in Camado
 title: "[Bug]: "
 labels: [bug]
 ---
@@ -19,7 +19,7 @@ labels: [bug]
 
 ## Environment
 
-- Miora version:
+- Camado version:
 - Browser / runtime:
 - OS:
 

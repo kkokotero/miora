@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for Miora
+about: Suggest an idea for Camado
 title: "[Feature]: "
 labels: [enhancement]
 ---

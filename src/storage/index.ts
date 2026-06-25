@@ -23,7 +23,7 @@ export interface StorageOptions {
 const memoryStores = new Map<string, Map<string, string>>();
 
 function resolveNamespace(namespace: string | undefined): string {
-	return namespace?.trim() || "miora";
+	return namespace?.trim() || "camado";
 }
 
 function resolveStorage(

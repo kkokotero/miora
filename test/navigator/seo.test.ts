@@ -81,24 +81,24 @@ test("Navigator.seo updates title, icon, metas, and links idempotently", () => {
 
 	try {
 		Navigator.seo.page({
-			title: "Miora App",
+			title: "Camado App",
 			icon: "/favicon.svg",
 			description: "Fast UI library",
 			canonical: "https://example.com",
-			metas: [{ property: "og:title", content: "Miora App" }],
+			metas: [{ property: "og:title", content: "Camado App" }],
 			links: [{ rel: "preload", href: "/fonts/inter.woff2", as: "font" }],
 		});
 
 		Navigator.seo.page({
-			title: "Miora App",
+			title: "Camado App",
 			icon: "/favicon.svg",
 			description: "Fast UI library",
 			canonical: "https://example.com",
-			metas: [{ property: "og:title", content: "Miora App" }],
+			metas: [{ property: "og:title", content: "Camado App" }],
 			links: [{ rel: "preload", href: "/fonts/inter.woff2", as: "font" }],
 		});
 
-		expect(doc.title).toBe("Miora App");
+		expect(doc.title).toBe("Camado App");
 		expect(
 			head.childNodes.filter((node: any) => node.tagName === "TITLE"),
 		).toHaveLength(1);
@@ -124,7 +124,7 @@ test("Navigator.seo updates title, icon, metas, and links idempotently", () => {
 						node.getAttribute("property") === "og:title",
 				) as any
 			).getAttribute("content"),
-		).toBe("Miora App");
+		).toBe("Camado App");
 	} finally {
 		(globalThis as any).document = previousDocument;
 	}

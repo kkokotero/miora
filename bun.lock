@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "miora",
+      "name": "camado",
       "devDependencies": {
         "@types/node": "latest",
         "bun-types": "latest",

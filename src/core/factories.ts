@@ -101,7 +101,7 @@ export function createElementFactory(
 		const owner = globalThis.document;
 
 		if (!owner) {
-			throw new Error(`Miora requires a DOM to create ${tagName}`);
+			throw new Error(`Camado requires a DOM to create ${tagName}`);
 		}
 
 		const element =

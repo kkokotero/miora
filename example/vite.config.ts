@@ -8,42 +8,42 @@ export default {
   resolve: {
     alias: [
       {
-        find: /^miora\/control$/,
+        find: /^camado\/control$/,
         replacement: resolve(repoRoot, "src/control/index.ts"),
       },
       {
-        find: /^miora\/core$/,
+        find: /^camado\/core$/,
         replacement: resolve(repoRoot, "src/core/index.ts"),
       },
       {
-        find: /^miora\/reactive$/,
+        find: /^camado\/reactive$/,
         replacement: resolve(repoRoot, "src/reactive/index.ts"),
       },
       {
-        find: /^miora\/html$/,
+        find: /^camado\/html$/,
         replacement: resolve(repoRoot, "src/html/index.ts"),
       },
       {
-        find: /^miora\/modifiers$/,
+        find: /^camado\/modifiers$/,
         replacement: resolve(repoRoot, "src/modifiers/index.ts"),
       },
       {
-        find: /^miora\/navigator$/,
+        find: /^camado\/navigator$/,
         replacement: resolve(repoRoot, "src/navigator/index.ts"),
       },
       {
-        find: /^miora\/svg$/,
+        find: /^camado\/svg$/,
         replacement: resolve(repoRoot, "src/svg/index.ts"),
       },
       {
-        find: /^miora\/unit$/,
+        find: /^camado\/unit$/,
         replacement: resolve(repoRoot, "src/unit/index.ts"),
       },
       {
-        find: /^miora\/validator$/,
+        find: /^camado\/validator$/,
         replacement: resolve(repoRoot, "src/validator/index.ts"),
       },
-      { find: /^miora$/, replacement: resolve(repoRoot, "src/index.ts") },
+      { find: /^camado$/, replacement: resolve(repoRoot, "src/index.ts") },
     ],
   },
   server: {

@@ -1,5 +1,5 @@
-import { BaseComponent, Component } from "miora/core";
-import { H1 } from "miora/html";
+import { BaseComponent, Component } from "camado/core";
+import { H1 } from "camado/html";
 
 @Component({ selector: "app-component" })
 class AppComponent extends BaseComponent {

@@ -1,6 +1,6 @@
-# Miora Vite Example
+# Camado Vite Example
 
-A minimal Vite example for the current `miora` package.
+A minimal Vite example for the current `camado` package.
 
 ## Run
 

@@ -9,7 +9,7 @@ import {
 } from "../../src/core/index.ts";
 import { Text } from "../../src/html/index.ts";
 
-@Component({ selector: "miora-invoke-test" })
+@Component({ selector: "camado-invoke-test" })
 class InvocationTest extends BaseComponent {
 	@Property()
 	label = "default";

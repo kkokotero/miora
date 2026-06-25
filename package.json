@@ -1,5 +1,5 @@
 {
-  "name": "miora",
+  "name": "camado",
   "version": "0.1.0",
   "description": "A modular TypeScript-first UI/runtime toolkit for declarative components, reactivity, validators, and browser helpers.",
   "type": "module",
@@ -62,9 +62,9 @@
   "repository": {
     "type": "git"
   },
-  "homepage": "https://github.com/kkokotero/miora",
+  "homepage": "https://github.com/kkokotero/camado",
   "bugs": {
-    "url": "https://github.com/kkokotero/miora/issues"
+    "url": "https://github.com/kkokotero/camado/issues"
   },
   "publishConfig": {
     "access": "public"

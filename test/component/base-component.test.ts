@@ -54,7 +54,7 @@ function createTestDocument(): Document {
 	} as Document;
 }
 
-@Component({ selector: "miora-test-counter" })
+@Component({ selector: "camado-test-counter" })
 class TestCounter extends BaseComponent {
 	@Reactive()
 	count = 0;
@@ -84,7 +84,7 @@ class TestCounter extends BaseComponent {
 	}
 }
 
-@Component({ selector: "miora-test-event" })
+@Component({ selector: "camado-test-event" })
 class TestEvent extends BaseComponent {
 	protected override render() {
 		return null;
@@ -96,7 +96,7 @@ class TestEvent extends BaseComponent {
 	}
 }
 
-@Component({ selector: "miora-test-event-input" })
+@Component({ selector: "camado-test-event-input" })
 class TestEventInput extends BaseComponent {
 	protected override render() {
 		return null;
@@ -108,7 +108,7 @@ class TestEventInput extends BaseComponent {
 	}
 }
 
-@Component({ selector: "miora-test-derived" })
+@Component({ selector: "camado-test-derived" })
 class TestDerivedReactive extends BaseComponent {
 	@Property()
 	start = 0;
@@ -121,7 +121,7 @@ class TestDerivedReactive extends BaseComponent {
 	}
 }
 
-@Component({ selector: "miora-test-loop-guard" })
+@Component({ selector: "camado-test-loop-guard" })
 class TestLoopGuard extends BaseComponent {
 	@Reactive()
 	count = 0;
@@ -142,7 +142,7 @@ class TestLoopGuard extends BaseComponent {
 	}
 }
 
-@Component({ selector: "miora-test-lifecycle" })
+@Component({ selector: "camado-test-lifecycle" })
 class TestLifecycleHooks extends BaseComponent {
 	mounted = 0;
 	destroyed = 0;
@@ -178,7 +178,7 @@ test("Reactive fields register as tracked metadata", () => {
 	const metadata = getComponentMetadata(TestDerivedReactive);
 
 	expect(metadata?.reactiveKeys.has("count")).toBe(true);
-	expect(metadata?.selector).toBe("miora-test-derived");
+	expect(metadata?.selector).toBe("camado-test-derived");
 });
 
 test("BaseComponent tracks reactive fields and lifecycle hooks", async () => {
@@ -316,7 +316,7 @@ test("Reactive fields can persist across browser restarts", async () => {
 		},
 	};
 
-	@Component({ selector: "miora-test-persistent" })
+	@Component({ selector: "camado-test-persistent" })
 	class TestPersistentCounter extends BaseComponent {
 		@Reactive({ persistent: true })
 		count = 1;

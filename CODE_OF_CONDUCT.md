@@ -2,7 +2,7 @@
 
 ## Our Goal
 
-`miora` aims to be a welcoming, respectful, and technically serious project.
+`camado` aims to be a welcoming, respectful, and technically serious project.
 
 We want contributors, users, and maintainers to feel safe asking questions, proposing changes, reporting bugs, and participating in review discussions.
 

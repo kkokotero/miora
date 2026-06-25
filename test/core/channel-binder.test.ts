@@ -76,7 +76,7 @@ class CounterBinder extends BaseBinder {
 	}
 }
 
-@Component({ selector: "miora-test-bound" })
+@Component({ selector: "camado-test-bound" })
 class TestBoundComponent extends BaseComponent {
 	@Bind(CounterBinder)
 	bind!: CounterBinder;

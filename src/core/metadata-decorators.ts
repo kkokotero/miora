@@ -174,7 +174,7 @@ function warnOnReactiveAccess(
 	const methodName = String(methodKey);
 	const keyList = accessedKeys.map(String).join(", ");
 	globalThis.console?.warn?.(
-		`Miora @Static(${methodName}) accessed reactive state (${keyList}); the result will be cached and may go stale.`,
+		`Camado @Static(${methodName}) accessed reactive state (${keyList}); the result will be cached and may go stale.`,
 	);
 }
 

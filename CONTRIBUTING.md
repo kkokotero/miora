@@ -1,6 +1,6 @@
-# Contributing to Miora
+# Contributing to Camado
 
-Thank you for contributing to `miora`.
+Thank you for contributing to `camado`.
 
 The goal of this project is to keep a modern TypeScript-first UI/runtime toolkit small, understandable, fast, and pleasant to use. Contributions that improve correctness, documentation, examples, tests, performance, and API clarity are welcome.
 
@@ -117,7 +117,7 @@ Feedback is meant to improve the project, not to discourage contributors. Questi
 
 ## Need Help?
 
-If you are unsure whether an idea fits `miora`, open an issue and describe:
+If you are unsure whether an idea fits `camado`, open an issue and describe:
 
 - the use case
 - the proposed API or behavior

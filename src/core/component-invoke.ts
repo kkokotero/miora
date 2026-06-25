@@ -22,7 +22,7 @@ export function invokeComponent<TComponent extends BaseComponent>(
 
 	if (!doc) {
 		throw new Error(
-			`Miora requires a DOM to invoke ${selector || component.name}`,
+			`Camado requires a DOM to invoke ${selector || component.name}`,
 		);
 	}
 
