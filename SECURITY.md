@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-`neptune` is still evolving quickly.
+`ustro` is still evolving quickly.
 
 At the moment, security fixes are only guaranteed for:
 
@@ -65,7 +65,7 @@ Once a fix is available, the project may publish:
 
 ## Security Design Notes
 
-`neptune` tries to reduce risk by:
+`ustro` tries to reduce risk by:
 
 - keeping the runtime surface relatively small and dependency-light
 - validating inputs explicitly

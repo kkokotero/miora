@@ -20,7 +20,7 @@ export function mount<TComponent extends BaseComponent>(
 			: (component as ComponentFactory<TComponent>)(options);
 
 	if (!element) {
-		throw new Error("Neptune mount() could not create an element");
+		throw new Error("Ustro mount() could not create an element");
 	}
 
 	target.append(element);

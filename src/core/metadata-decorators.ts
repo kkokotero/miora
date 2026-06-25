@@ -174,7 +174,7 @@ function warnOnReactiveAccess(
 	const methodName = String(methodKey);
 	const keyList = accessedKeys.map(String).join(", ");
 	globalThis.console?.warn?.(
-		`Neptune @Static(${methodName}) accessed reactive state (${keyList}); the result will be cached and may go stale.`,
+		`Ustro @Static(${methodName}) accessed reactive state (${keyList}); the result will be cached and may go stale.`,
 	);
 }
 

@@ -268,7 +268,7 @@ const { Attribute, Event: EventToken } = await import(
 );
 const { Button, Div, Span, Text } = await import("../../src/html/index.ts");
 
-@Component({ selector: "neptune-dom-hydration" })
+@Component({ selector: "ustro-dom-hydration" })
 class DomHydrationComponent extends BaseComponent {
 	@Property()
 	start = 0;
@@ -298,7 +298,7 @@ class DomHydrationComponent extends BaseComponent {
 void DomHydrationComponent;
 
 test("custom elements hydrate attrs, children, and slots from light DOM", async () => {
-	const HostCtor = customElements.get("neptune-dom-hydration") as new () => any;
+	const HostCtor = customElements.get("ustro-dom-hydration") as new () => any;
 	const host = new HostCtor() as any;
 	host.setAttribute("start", "10");
 	host.append(new MockText("App-level child content"));
@@ -338,7 +338,7 @@ test("custom elements hydrate attrs, children, and slots from light DOM", async 
 	expect(host.footer).toBeDefined();
 });
 
-@Component({ selector: "neptune-dom-patch" })
+@Component({ selector: "ustro-dom-patch" })
 class DomPatchComponent extends BaseComponent {
 	@Property()
 	label = "one";

@@ -1,6 +1,6 @@
-# Neptune Vite Example
+# Ustro Vite Example
 
-A minimal Vite example for the current `neptune` package.
+A minimal Vite example for the current `ustro` package.
 
 ## Run
 

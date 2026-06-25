@@ -7,10 +7,10 @@ import { getComponentMetadata } from "./metadata.ts";
 import type { BaseComponent } from "./base-component.ts";
 import type { ComponentConstructor } from "./component-types.ts";
 
-const componentInstanceSymbol = Symbol("neptune.componentInstance");
-const componentHostKeysSymbol = Symbol("neptune.componentHostKeys");
-const componentHydratedSymbol = Symbol("neptune.componentHydrated");
-const componentProjectedSymbol = Symbol("neptune.componentProjected");
+const componentInstanceSymbol = Symbol("ustro.componentInstance");
+const componentHostKeysSymbol = Symbol("ustro.componentHostKeys");
+const componentHydratedSymbol = Symbol("ustro.componentHydrated");
+const componentProjectedSymbol = Symbol("ustro.componentProjected");
 
 export function isComponentHostElement(
 	value: unknown,
@@ -405,7 +405,7 @@ export function defineComponentHost<TComponent extends BaseComponent>(
 	const hostKeys = collectHostKeys(metadata);
 	const HostElementBase = getHostElementBase();
 
-	class NeptuneComponentHost extends HostElementBase {
+	class UstroComponentHost extends HostElementBase {
 		declare [componentInstanceSymbol]: TComponent;
 
 		constructor() {
@@ -474,7 +474,7 @@ export function defineComponentHost<TComponent extends BaseComponent>(
 	}
 
 	for (const key of hostKeys) {
-		Object.defineProperty(NeptuneComponentHost.prototype, key, {
+		Object.defineProperty(UstroComponentHost.prototype, key, {
 			configurable: true,
 			enumerable: true,
 			get(this: ComponentHostInstance<TComponent>) {
@@ -499,7 +499,7 @@ export function defineComponentHost<TComponent extends BaseComponent>(
 			continue;
 		}
 
-		Object.defineProperty(NeptuneComponentHost.prototype, key, {
+		Object.defineProperty(UstroComponentHost.prototype, key, {
 			configurable: true,
 			writable: true,
 			value(this: ComponentHostInstance<TComponent>, ...args: unknown[]) {
@@ -520,6 +520,6 @@ export function defineComponentHost<TComponent extends BaseComponent>(
 
 	customElementsApi.define(
 		selector,
-		NeptuneComponentHost as unknown as CustomElementConstructor,
+		UstroComponentHost as unknown as CustomElementConstructor,
 	);
 }

@@ -9,7 +9,7 @@ import {
 } from "../../src/core/index.ts";
 import { Text } from "../../src/html/index.ts";
 
-@Component({ selector: "neptune-invoke-test" })
+@Component({ selector: "ustro-invoke-test" })
 class InvocationTest extends BaseComponent {
 	@Property()
 	label = "default";

@@ -354,7 +354,7 @@ function getPersistentStoragePrefix(
 	metadata: ComponentMetadata,
 	ctor: Function,
 ): string {
-	return `neptune:persist:${metadata.selector ?? ctor.name}`;
+	return `ustro:persist:${metadata.selector ?? ctor.name}`;
 }
 
 function readStoredFieldValue(prefix: string, key: ComponentFieldKey): unknown {

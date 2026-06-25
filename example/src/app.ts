@@ -1,5 +1,5 @@
-import { BaseComponent, Component } from "neptune/core";
-import { H1 } from "neptune/html";
+import { BaseComponent, Component } from "ustro/core";
+import { H1 } from "ustro/html";
 
 @Component({ selector: "app-component" })
 class AppComponent extends BaseComponent {

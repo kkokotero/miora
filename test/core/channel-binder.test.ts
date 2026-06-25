@@ -76,7 +76,7 @@ class CounterBinder extends BaseBinder {
 	}
 }
 
-@Component({ selector: "neptune-test-bound" })
+@Component({ selector: "ustro-test-bound" })
 class TestBoundComponent extends BaseComponent {
 	@Bind(CounterBinder)
 	bind!: CounterBinder;

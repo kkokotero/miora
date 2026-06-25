@@ -9,8 +9,8 @@ test("validator exposes common string helpers", () => {
 		Validator.string().uuid().parse("123e4567-e89b-12d3-a456-426614174000"),
 	).toBe("123e4567-e89b-12d3-a456-426614174000");
 	expect(
-		Validator.string().startsWith("ne").includes("pt").parse("neptune"),
-	).toBe("neptune");
+		Validator.string().startsWith("us").includes("tr").parse("ustro"),
+	).toBe("ustro");
 	expect(Validator.string().endsWith("on").parse("neon")).toBe("neon");
 	expect(Validator.string().oneOf(["red", "green"]).parse("green")).toBe(
 		"green",

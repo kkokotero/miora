@@ -54,7 +54,7 @@ function createTestDocument(): Document {
 	} as Document;
 }
 
-@Component({ selector: "neptune-test-counter" })
+@Component({ selector: "ustro-test-counter" })
 class TestCounter extends BaseComponent {
 	@Reactive()
 	count = 0;
@@ -84,7 +84,7 @@ class TestCounter extends BaseComponent {
 	}
 }
 
-@Component({ selector: "neptune-test-event" })
+@Component({ selector: "ustro-test-event" })
 class TestEvent extends BaseComponent {
 	protected override render() {
 		return null;
@@ -96,7 +96,7 @@ class TestEvent extends BaseComponent {
 	}
 }
 
-@Component({ selector: "neptune-test-event-input" })
+@Component({ selector: "ustro-test-event-input" })
 class TestEventInput extends BaseComponent {
 	protected override render() {
 		return null;
@@ -108,7 +108,7 @@ class TestEventInput extends BaseComponent {
 	}
 }
 
-@Component({ selector: "neptune-test-derived" })
+@Component({ selector: "ustro-test-derived" })
 class TestDerivedReactive extends BaseComponent {
 	@Property()
 	start = 0;
@@ -121,7 +121,7 @@ class TestDerivedReactive extends BaseComponent {
 	}
 }
 
-@Component({ selector: "neptune-test-loop-guard" })
+@Component({ selector: "ustro-test-loop-guard" })
 class TestLoopGuard extends BaseComponent {
 	@Reactive()
 	count = 0;
@@ -142,7 +142,7 @@ class TestLoopGuard extends BaseComponent {
 	}
 }
 
-@Component({ selector: "neptune-test-lifecycle" })
+@Component({ selector: "ustro-test-lifecycle" })
 class TestLifecycleHooks extends BaseComponent {
 	mounted = 0;
 	destroyed = 0;
@@ -178,7 +178,7 @@ test("Reactive fields register as tracked metadata", () => {
 	const metadata = getComponentMetadata(TestDerivedReactive);
 
 	expect(metadata?.reactiveKeys.has("count")).toBe(true);
-	expect(metadata?.selector).toBe("neptune-test-derived");
+	expect(metadata?.selector).toBe("ustro-test-derived");
 });
 
 test("BaseComponent tracks reactive fields and lifecycle hooks", async () => {
@@ -316,7 +316,7 @@ test("Reactive fields can persist across browser restarts", async () => {
 		},
 	};
 
-	@Component({ selector: "neptune-test-persistent" })
+	@Component({ selector: "ustro-test-persistent" })
 	class TestPersistentCounter extends BaseComponent {
 		@Reactive({ persistent: true })
 		count = 1;

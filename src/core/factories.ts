@@ -101,7 +101,7 @@ export function createElementFactory(
 		const owner = globalThis.document;
 
 		if (!owner) {
-			throw new Error(`Neptune requires a DOM to create ${tagName}`);
+			throw new Error(`Ustro requires a DOM to create ${tagName}`);
 		}
 
 		const element =

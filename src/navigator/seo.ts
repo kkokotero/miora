@@ -46,7 +46,7 @@ export interface SeoHeadHelpers {
 function requireDocument(): Document {
 	const doc = globalThis.document;
 	if (!doc) {
-		throw new Error("Neptune requires a DOM to manage SEO metadata");
+		throw new Error("Ustro requires a DOM to manage SEO metadata");
 	}
 
 	return doc;

@@ -1,5 +1,5 @@
 {
-  "name": "neptune",
+  "name": "ustro",
   "version": "0.1.0",
   "description": "A modular TypeScript-first UI/runtime toolkit for declarative components, reactivity, validators, and browser helpers.",
   "type": "module",
@@ -62,9 +62,9 @@
   "repository": {
     "type": "git"
   },
-  "homepage": "https://github.com/kkokotero/neptune",
+  "homepage": "https://github.com/kkokotero/ustro",
   "bugs": {
-    "url": "https://github.com/kkokotero/neptune/issues"
+    "url": "https://github.com/kkokotero/ustro/issues"
   },
   "publishConfig": {
     "access": "public"

@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "neptune",
+      "name": "ustro",
       "devDependencies": {
         "@types/node": "latest",
         "bun-types": "latest",

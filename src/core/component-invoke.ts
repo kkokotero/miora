@@ -22,7 +22,7 @@ export function invokeComponent<TComponent extends BaseComponent>(
 
 	if (!doc) {
 		throw new Error(
-			`Neptune requires a DOM to invoke ${selector || component.name}`,
+			`Ustro requires a DOM to invoke ${selector || component.name}`,
 		);
 	}
 

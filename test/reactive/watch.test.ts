@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import { Component, getComponentMetadata } from "../../src/core/index.ts";
 import { Watch } from "../../src/reactive/index.ts";
 
-@Component({ selector: "neptune-watch-test" })
+@Component({ selector: "ustro-watch-test" })
 class WatchTestComponent {
 	@Watch("count")
 	onCountChange() {}

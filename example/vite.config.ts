@@ -8,42 +8,42 @@ export default {
   resolve: {
     alias: [
       {
-        find: /^neptune\/control$/,
+        find: /^ustro\/control$/,
         replacement: resolve(repoRoot, "src/control/index.ts"),
       },
       {
-        find: /^neptune\/core$/,
+        find: /^ustro\/core$/,
         replacement: resolve(repoRoot, "src/core/index.ts"),
       },
       {
-        find: /^neptune\/reactive$/,
+        find: /^ustro\/reactive$/,
         replacement: resolve(repoRoot, "src/reactive/index.ts"),
       },
       {
-        find: /^neptune\/html$/,
+        find: /^ustro\/html$/,
         replacement: resolve(repoRoot, "src/html/index.ts"),
       },
       {
-        find: /^neptune\/modifiers$/,
+        find: /^ustro\/modifiers$/,
         replacement: resolve(repoRoot, "src/modifiers/index.ts"),
       },
       {
-        find: /^neptune\/navigator$/,
+        find: /^ustro\/navigator$/,
         replacement: resolve(repoRoot, "src/navigator/index.ts"),
       },
       {
-        find: /^neptune\/svg$/,
+        find: /^ustro\/svg$/,
         replacement: resolve(repoRoot, "src/svg/index.ts"),
       },
       {
-        find: /^neptune\/unit$/,
+        find: /^ustro\/unit$/,
         replacement: resolve(repoRoot, "src/unit/index.ts"),
       },
       {
-        find: /^neptune\/validator$/,
+        find: /^ustro\/validator$/,
         replacement: resolve(repoRoot, "src/validator/index.ts"),
       },
-      { find: /^neptune$/, replacement: resolve(repoRoot, "src/index.ts") },
+      { find: /^ustro$/, replacement: resolve(repoRoot, "src/index.ts") },
     ],
   },
   server: {

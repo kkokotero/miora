@@ -180,7 +180,7 @@ function createMockElement() {
 	return api;
 }
 
-test("Transition.name integrates with Neptune elements", () => {
+test("Transition.name integrates with Ustro elements", () => {
 	const previousDocument = globalThis.document;
 	const element = createMockElement();
 	const styleElement = createMockElement();
