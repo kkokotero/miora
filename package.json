@@ -1,6 +1,6 @@
 {
   "name": "camado",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A modular TypeScript-first UI/runtime toolkit for declarative components, reactivity, validators, and browser helpers.",
   "type": "module",
   "private": false,
