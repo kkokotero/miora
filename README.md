@@ -573,22 +573,18 @@ Main exports:
 
 - one factory per SVG tag, for example `Svg`, `Path`, `Circle`, `Rect`, `LinearGradient`, `Text`
 
-SVG factories also accept children only. Use `Attributes` for SVG attributes and `Style`/`Events` only where they make sense on SVG nodes.
+SVG factories also accept children only. Use the fluent `Attribute` helper for SVG attributes and `Style`/`Events` only where they make sense on SVG nodes. `Attribute.class(...)` merges class tokens, and the helper surface includes common SVG attributes like `viewBox`, `fill`, `stroke`, `strokeWidth`, `cx`, `cy`, and `r`.
 
 Example:
 
 ```ts
 import { Circle, Svg } from "camado/svg";
-import { Attributes } from "camado/modifiers";
+import { Attribute } from "camado/modifiers";
 
 export const icon = Svg(
-  Attributes.attr("viewBox", "0 0 24 24"),
-  Attributes.attr("width", 24),
-  Attributes.attr("height", 24),
+  Attribute.class("icon", "icon--solid").viewBox("0 0 24 24").width(24).height(24),
   Circle(
-    Attributes.attr("cx", 12),
-    Attributes.attr("cy", 12),
-    Attributes.attr("r", 10),
+    Attribute.cx(12).cy(12).r(10).fill("none").stroke("currentColor").strokeWidth(2),
   ),
 );
 ```
