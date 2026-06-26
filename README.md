@@ -726,7 +726,7 @@ class CounterModel {
   @Reactive()
   count = 0;
 
-  @Watch("count")
+  @Watch.of((self) => self.count)
   onCountChange() {
     console.log("count changed");
   }

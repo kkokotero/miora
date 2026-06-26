@@ -10,7 +10,7 @@ class WatchTestComponent {
 	@Watch("count")
 	onCountChangeAgain() {}
 
-	@Watch("label")
+	@Watch.of((self) => self.label)
 	onLabelChange() {}
 }
 
