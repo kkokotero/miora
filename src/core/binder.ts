@@ -17,6 +17,10 @@ export type BinderConstructor<
 
 const binderInstances = new WeakMap<BinderConstructor<any>, BaseBinder<any>>();
 
+function releaseBinderInstance(binder: BinderConstructor<any>): void {
+	binderInstances.delete(binder);
+}
+
 export function getBinderInstance<
 	TEvents extends Record<string, unknown> = Record<string, unknown>,
 	TBinder extends BaseBinder<TEvents> = BaseBinder<TEvents>,
@@ -67,8 +71,8 @@ export abstract class BaseBinder<
 
 		const wasEmpty = this.#contexts.size === 0;
 		this.#contexts.set(context.component, context);
-		this.bind(context);
 		if (wasEmpty) {
+			this.bind(context);
 			this.onConnect(context);
 		}
 	}
@@ -80,9 +84,13 @@ export abstract class BaseBinder<
 
 		const wasLast = this.#contexts.size === 1;
 		this.#contexts.delete(context.component);
-		this.unbind(context);
 		if (wasLast) {
-			this.onDisconnect(context);
+			try {
+				this.unbind(context);
+				this.onDisconnect(context);
+			} finally {
+				releaseBinderInstance(this.constructor as BinderConstructor<any>);
+			}
 		}
 	}
 

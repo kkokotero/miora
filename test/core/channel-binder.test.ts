@@ -114,25 +114,49 @@ class TestBoundComponent extends BaseComponent {
 	}
 }
 
-test("Bind connects and disconnects binders with the component lifecycle", async () => {
+test("Bind runs once per binder instance lifetime", async () => {
 	const previousDocument = globalThis.document;
 	(globalThis as typeof globalThis & { document: Document }).document =
 		createTestDocument();
 
 	try {
-		const component = TestBoundComponent.create();
-		component.connectedCallback();
+		const first = TestBoundComponent.create();
+		const second = TestBoundComponent.create();
+
+		first.connectedCallback();
 		await Promise.resolve();
 		await Promise.resolve();
 
-		expect(component.bind).toBe(CounterBinder.instance);
+		expect(first.bind).toBe(CounterBinder.instance);
 		expect(binds).toBe(1);
 		expect(connects).toBe(1);
 		expect(disconnects).toBe(0);
 
-		component.disconnectedCallback();
+		second.connectedCallback();
+		await Promise.resolve();
+		await Promise.resolve();
+
+		expect(second.bind).toBe(first.bind);
+		expect(binds).toBe(1);
+		expect(connects).toBe(1);
+
+		first.disconnectedCallback();
+		expect(unbinds).toBe(0);
+		expect(disconnects).toBe(0);
+
+		second.disconnectedCallback();
 		expect(unbinds).toBe(1);
 		expect(disconnects).toBe(1);
+		expect(CounterBinder.instance).not.toBe(first.bind);
+
+		const third = TestBoundComponent.create();
+		third.connectedCallback();
+		await Promise.resolve();
+		await Promise.resolve();
+
+		expect(third.bind).not.toBe(first.bind);
+		expect(binds).toBe(2);
+		expect(connects).toBe(2);
 	} finally {
 		(globalThis as typeof globalThis & { document: Document }).document =
 			previousDocument as Document;
