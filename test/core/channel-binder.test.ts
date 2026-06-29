@@ -138,15 +138,15 @@ test("Bind runs once per binder instance lifetime", async () => {
 
 		expect(second.bind).toBe(first.bind);
 		expect(binds).toBe(1);
-		expect(connects).toBe(1);
+		expect(connects).toBe(2);
 
 		first.disconnectedCallback();
 		expect(unbinds).toBe(0);
-		expect(disconnects).toBe(0);
+		expect(disconnects).toBe(1);
 
 		second.disconnectedCallback();
 		expect(unbinds).toBe(1);
-		expect(disconnects).toBe(1);
+		expect(disconnects).toBe(2);
 		expect(CounterBinder.instance).not.toBe(first.bind);
 
 		const third = TestBoundComponent.create();
@@ -156,7 +156,11 @@ test("Bind runs once per binder instance lifetime", async () => {
 
 		expect(third.bind).not.toBe(first.bind);
 		expect(binds).toBe(2);
-		expect(connects).toBe(2);
+		expect(connects).toBe(3);
+
+		third.disconnectedCallback();
+		expect(unbinds).toBe(2);
+		expect(disconnects).toBe(3);
 	} finally {
 		(globalThis as typeof globalThis & { document: Document }).document =
 			previousDocument as Document;
