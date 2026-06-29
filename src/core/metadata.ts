@@ -3,6 +3,13 @@ import type { BinderConstructor } from "./binder.ts";
 export type ComponentSelector = string;
 export type ComponentFieldKey = string | symbol;
 
+export type QueryFieldSelector = string | ((host: HTMLElement) => unknown);
+
+export interface QueryFieldConfig {
+	selector: QueryFieldSelector;
+	multiple: boolean;
+}
+
 export interface ComponentMetadata {
 	selector?: ComponentSelector;
 	reactiveKeys: Set<ComponentFieldKey>;
@@ -14,6 +21,7 @@ export interface ComponentMetadata {
 	childrenKeys: Set<ComponentFieldKey>;
 	childrenOptionalKeys: Set<ComponentFieldKey>;
 	hostKeys: Set<ComponentFieldKey>;
+	queryKeys: Map<ComponentFieldKey, QueryFieldConfig>;
 	slotKeys: Map<ComponentFieldKey, string>;
 	slotOptionalKeys: Set<ComponentFieldKey>;
 	watchers: Map<ComponentFieldKey, Set<ComponentFieldKey>>;
@@ -47,6 +55,7 @@ function createComponentMetadata(): ComponentMetadata {
 		childrenKeys: new Set<ComponentFieldKey>(),
 		childrenOptionalKeys: new Set<ComponentFieldKey>(),
 		hostKeys: new Set<ComponentFieldKey>(),
+		queryKeys: new Map<ComponentFieldKey, QueryFieldConfig>(),
 		slotKeys: new Map<ComponentFieldKey, string>(),
 		slotOptionalKeys: new Set<ComponentFieldKey>(),
 		watchers: new Map<ComponentFieldKey, Set<ComponentFieldKey>>(),
@@ -146,6 +155,18 @@ export function markHostField(target: object, key: ComponentFieldKey): void {
 	getOrCreateComponentMetadata(target.constructor as Function).hostKeys.add(
 		key,
 	);
+}
+
+export function markQueryField(
+	target: object,
+	key: ComponentFieldKey,
+	selector: QueryFieldSelector,
+	multiple = false,
+): void {
+	getOrCreateComponentMetadata(target.constructor as Function).queryKeys.set(key, {
+		selector,
+		multiple,
+	});
 }
 
 export function markChildrenField(
@@ -332,6 +353,165 @@ export function installTrackedFields(
 
 		installField(key);
 	}
+}
+
+export function installQueryFields(
+	instance: Record<string | symbol, unknown>,
+): void {
+	const metadata = getComponentMetadata(instance.constructor as Function);
+	if (!metadata || metadata.queryKeys.size === 0) {
+		return;
+	}
+
+	const host = (instance as { hostElement?: HTMLElement }).hostElement;
+
+	for (const [key, config] of metadata.queryKeys) {
+		Reflect.deleteProperty(instance, key);
+		Object.defineProperty(instance, key, {
+			configurable: true,
+			enumerable: true,
+			get() {
+				if (!host) {
+					return config.multiple ? [] : null;
+				}
+
+				if (typeof config.selector === "function") {
+					const result = config.selector(host);
+					return config.multiple
+						? Array.from(
+							(result ?? []) as ArrayLike<unknown> | Iterable<unknown>,
+						)
+						: (result ?? null);
+				}
+
+				return config.multiple
+					? findQueryMatches(host, config.selector, false)
+					: (findQueryMatches(host, config.selector, true)[0] ?? null);
+			},
+		});
+	}
+}
+
+function findQueryMatches(
+	host: HTMLElement,
+	selector: string,
+	firstOnly: boolean,
+): unknown[] {
+	const scope = host.shadowRoot ?? host;
+	const result: unknown[] = [];
+	const visit = (node: unknown): boolean => {
+		if (matchesSelector(node, selector)) {
+			result.push(node);
+			if (firstOnly) {
+				return true;
+			}
+		}
+
+		for (const child of getChildren(node)) {
+			if (visit(child) && firstOnly) {
+				return true;
+			}
+		}
+
+		return false;
+	};
+
+	for (const child of getChildren(scope)) {
+		if (visit(child) && firstOnly) {
+			break;
+		}
+	}
+
+	return result;
+}
+
+function getChildren(value: unknown): unknown[] {
+	if (!value || typeof value !== "object") {
+		return [];
+	}
+
+	const childNodes = Reflect.get(
+		value as unknown as Record<string | symbol, unknown>,
+		"childNodes",
+	);
+	if (typeof childNodes === "object" && childNodes !== null) {
+		return Array.from(childNodes as ArrayLike<unknown>);
+	}
+
+	const children = Reflect.get(
+		value as unknown as Record<string | symbol, unknown>,
+		"children",
+	);
+	if (typeof children === "object" && children !== null) {
+		return Array.from(children as ArrayLike<unknown>);
+	}
+
+	return [];
+}
+
+function matchesSelector(value: unknown, selector: string): boolean {
+	if (!value || typeof value !== "object") {
+		return false;
+	}
+
+	const nativeMatches = Reflect.get(
+		value as unknown as Record<string | symbol, unknown>,
+		"matches",
+	);
+	if (typeof nativeMatches === "function") {
+		try {
+			return Boolean(nativeMatches.call(value, selector));
+		} catch {
+			// fall back to the minimal matcher
+		}
+	}
+
+	const trimmed = selector.trim();
+	if (!trimmed) {
+		return false;
+	}
+
+	if (trimmed.startsWith("#")) {
+		const getAttribute = Reflect.get(
+			value as unknown as Record<string | symbol, unknown>,
+			"getAttribute",
+		);
+		if (typeof getAttribute === "function") {
+			return getAttribute.call(value, "id") === trimmed.slice(1);
+		}
+
+		const id = Reflect.get(
+			value as unknown as Record<string | symbol, unknown>,
+			"id",
+		);
+		return id === trimmed.slice(1);
+	}
+
+	if (trimmed.startsWith(".")) {
+		const getAttribute = Reflect.get(
+			value as unknown as Record<string | symbol, unknown>,
+			"getAttribute",
+		);
+		if (typeof getAttribute === "function") {
+			const raw = getAttribute.call(value, "class");
+			return typeof raw === "string" && raw.split(/\s+/).includes(trimmed.slice(1));
+		}
+
+		const className = Reflect.get(
+			value as unknown as Record<string | symbol, unknown>,
+			"className",
+		);
+		return (
+			typeof className === "string" &&
+			className.split(/\s+/).includes(trimmed.slice(1))
+		);
+	}
+
+	const tagName = Reflect.get(
+		value as unknown as Record<string | symbol, unknown>,
+		"tagName",
+	);
+	return typeof tagName === "string" && tagName.toUpperCase() === trimmed.toUpperCase();
 }
 
 export function dispatchWatchers(

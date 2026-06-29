@@ -79,11 +79,25 @@ class FallbackHostElement {
 	}
 
 	replaceChildren(...nodes: Array<Node | string>): void {
-		this.children = [...nodes];
+		for (const child of this.children) {
+			if (typeof child === "object" && child !== null) {
+				Reflect.set(child as unknown as Record<string | symbol, unknown>, "parentNode", null);
+				Reflect.set(child as unknown as Record<string | symbol, unknown>, "parentElement", null);
+			}
+		}
+
+		this.children = [];
+		this.append(...nodes);
 	}
 
 	append(...nodes: Array<Node | string>): void {
-		this.children.push(...nodes);
+		for (const node of nodes) {
+			if (typeof node === "object" && node !== null) {
+				Reflect.set(node as unknown as Record<string | symbol, unknown>, "parentNode", this);
+				Reflect.set(node as unknown as Record<string | symbol, unknown>, "parentElement", this);
+			}
+			this.children.push(node);
+		}
 	}
 
 	insertBefore(node: Node | string, anchor: Node | string | null): void {
@@ -98,8 +112,151 @@ class FallbackHostElement {
 			return;
 		}
 
+		if (typeof node === "object" && node !== null) {
+			Reflect.set(node as unknown as Record<string | symbol, unknown>, "parentNode", this);
+			Reflect.set(node as unknown as Record<string | symbol, unknown>, "parentElement", this);
+		}
 		this.children.splice(index, 0, node);
 	}
+
+	querySelector(selector: string): unknown {
+		return queryAll(this, selector, true)[0] ?? null;
+	}
+
+	querySelectorAll(selector: string): unknown[] {
+		return queryAll(this, selector, false);
+	}
+
+	closest(selector: string): unknown {
+		let current: unknown = this;
+		while (current) {
+			if (matchesSelector(current, selector)) {
+				return current;
+			}
+
+			current = Reflect.get(
+				current as unknown as Record<string | symbol, unknown>,
+				"parentElement",
+			) ?? Reflect.get(current as unknown as Record<string | symbol, unknown>, "parentNode");
+		}
+
+		return null;
+	}
+
+	matches(selector: string): boolean {
+		return matchesSelector(this, selector);
+	}
+}
+
+function queryAll(
+	root: unknown,
+	selector: string,
+	firstOnly: boolean,
+): unknown[] {
+	const result: unknown[] = [];
+	const visit = (node: unknown): boolean => {
+		if (matchesSelector(node, selector)) {
+			result.push(node);
+			if (firstOnly) {
+				return true;
+			}
+		}
+
+		for (const child of getChildren(node)) {
+			if (visit(child) && firstOnly) {
+				return true;
+			}
+		}
+
+		return false;
+	};
+
+	visit(root);
+	return result;
+}
+
+function getChildren(value: unknown): unknown[] {
+	if (!value || typeof value !== "object") {
+		return [];
+	}
+
+	const children = Reflect.get(value as unknown as Record<string | symbol, unknown>, "children");
+	if (Array.isArray(children)) {
+		return children;
+	}
+
+	const childNodes = Reflect.get(value as unknown as Record<string | symbol, unknown>, "childNodes");
+	if (Array.isArray(childNodes)) {
+		return childNodes;
+	}
+
+	return [];
+}
+
+function matchesSelector(value: unknown, selector: string): boolean {
+	if (!value || typeof value !== "object") {
+		return false;
+	}
+
+	const trimmed = selector.trim();
+	if (!trimmed) {
+		return false;
+	}
+
+	if (trimmed.startsWith("#")) {
+		return getAttribute(value, "id") === trimmed.slice(1);
+	}
+
+	if (trimmed.startsWith(".")) {
+		return hasClass(value, trimmed.slice(1));
+	}
+
+	return getTagName(value) === trimmed.toUpperCase();
+}
+
+function getTagName(value: unknown): string | undefined {
+	if (!value || typeof value !== "object") {
+		return undefined;
+	}
+
+	const tagName = Reflect.get(value as unknown as Record<string | symbol, unknown>, "tagName");
+	return typeof tagName === "string" ? tagName.toUpperCase() : undefined;
+}
+
+function getAttribute(value: unknown, name: string): string | null {
+	if (!value || typeof value !== "object") {
+		return null;
+	}
+
+	const getter = Reflect.get(value as unknown as Record<string | symbol, unknown>, "getAttribute");
+	if (typeof getter === "function") {
+		return getter.call(value, name) as string | null;
+	}
+
+	const direct = Reflect.get(value as unknown as Record<string | symbol, unknown>, name);
+	return typeof direct === "string" ? direct : null;
+}
+
+function hasClass(value: unknown, className: string): boolean {
+	if (!value || typeof value !== "object") {
+		return false;
+	}
+
+	const classList = Reflect.get(value as unknown as Record<string | symbol, unknown>, "classList");
+	if (classList && typeof classList === "object") {
+		const contains = Reflect.get(classList as unknown as Record<string | symbol, unknown>, "contains");
+		if (typeof contains === "function") {
+			return Boolean(contains.call(classList, className));
+		}
+
+		const values = Reflect.get(classList as unknown as Record<string | symbol, unknown>, "values");
+		if (Array.isArray(values)) {
+			return values.includes(className);
+		}
+	}
+
+	const classAttr = getAttribute(value, "class") ?? getAttribute(value, "className");
+	return typeof classAttr === "string" && classAttr.split(/\s+/).includes(className);
 }
 
 function getHostElementBase(): typeof HTMLElement | typeof FallbackHostElement {

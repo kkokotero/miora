@@ -9,6 +9,7 @@ export type { ChildrenNodes } from "./children.ts";
 export { Component } from "./component.ts";
 export { Delay, Interval, OnDestroy, OnMount } from "./lifecycle.ts";
 export { Output } from "./input.ts";
+export { Query, Queries } from "./query.ts";
 export { mount } from "./mount.ts";
 export { prepare } from "./prepare.ts";
 export { Ref } from "./ref.ts";

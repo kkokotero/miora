@@ -264,6 +264,8 @@ const {
 	Children,
 	Component,
 	Property,
+	Query,
+	Queries,
 	Self,
 	Slot,
 	createNodeRef,
@@ -273,7 +275,7 @@ const { patchRender } = await import("../../src/core/patch.ts");
 const { Attribute, Event: EventToken } = await import(
 	"../../src/modifiers/index.ts"
 );
-const { Button, Div, Span, Text } = await import("../../src/html/index.ts");
+const { Button, Div, Input, Span, Text } = await import("../../src/html/index.ts");
 
 @Component({ selector: "camado-dom-hydration" })
 class DomHydrationComponent extends BaseComponent {
@@ -413,6 +415,39 @@ test("Self applies modifiers to the component host", async () => {
 	expect(host.getAttribute("class")).toBe("selfy");
 	expect(extractText(host)).toContain("one");
 });
+
+@Component({ selector: "camado-query-demo" })
+class QueryDemoComponent extends BaseComponent {
+	@Query((host) => {
+		const root = (host as any).children?.[0] ?? (host as any).childNodes?.[0];
+		return (root?.children?.[0] ?? root?.childNodes?.[0]) as HTMLInputElement | null;
+	})
+	nameInput!: HTMLInputElement | null;
+
+	@Queries(".item")
+	items!: HTMLElement[];
+
+	protected override render() {
+		return Div(
+			Input(Attribute.id("name")),
+			Span(Attribute.class("item"), "A"),
+			Span(Attribute.class("item"), "B"),
+		);
+	}
+}
+
+void QueryDemoComponent;
+
+test("Query and Queries resolve from the host tree", async () => {
+	const host = QueryDemoComponent.create() as any;
+	host.connectedCallback();
+	await Promise.resolve();
+	await Promise.resolve();
+
+	expect(host.nameInput?.tagName.toLowerCase()).toBe("input");
+	expect(host.items).toHaveLength(2);
+});
+
 
 test("Self throws when nested inside an html constructor", () => {
 	expect(() =>

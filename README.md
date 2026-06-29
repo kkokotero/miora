@@ -123,7 +123,7 @@ Component, runtime, and rendering primitives.
 Main exports:
 
 - `Component`, `BaseComponent`, `mount`, `prepare`
-- `Channel`, `Bind`, `Host`, `BaseBinder`
+- `Channel`, `Bind`, `Host`, `Query`, `Queries`, `BaseBinder`
 - `Children`, `Ref`, `Output`, `Property`, `Slot`
 - lifecycle decorators: `OnMount`, `OnDestroy`, `Delay`, `Interval`
 - metadata/runtime helpers and DOM patch/render utilities
@@ -343,6 +343,35 @@ import { Span } from "camado/html";
 class ProfileCard extends BaseComponent {
   protected override render() {
     return Self(Attribute.class("profile-card"), Span("Body"));
+  }
+}
+```
+
+#### `@Query` / `@Queries`
+
+`@Query()` resolves one element from the component host tree. `@Queries()` returns all matches as an array. Both resolve lazily when you read the field, so they are safe to use in `@OnMount()` and later.
+
+Example:
+
+```ts
+import { BaseComponent, Component, Query, Queries } from "camado/core";
+import { Attribute } from "camado/modifiers";
+import { Div, Input, Span } from "camado/html";
+
+@Component({ selector: "user-card" })
+class UserCard extends BaseComponent {
+  @Query("#name")
+  name!: HTMLInputElement | null;
+
+  @Queries(".item")
+  items!: HTMLElement[];
+
+  protected override render() {
+    return Div(
+      Input(Attribute.id("name")),
+      Span(Attribute.class("item"), "A"),
+      Span(Attribute.class("item"), "B"),
+    );
   }
 }
 ```

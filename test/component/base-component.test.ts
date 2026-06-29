@@ -8,9 +8,13 @@ import {
 	OnMount,
 	Output,
 	Property,
+	Query,
+	Queries,
 	getComponentMetadata,
 } from "../../src/core/index.ts";
 import { Event, Reactive, Watch } from "../../src/reactive/index.ts";
+import { Attribute } from "../../src/modifiers/index.ts";
+import { Div, Input, Span } from "../../src/html/index.ts";
 
 const customElementsRegistry = new Map<string, CustomElementConstructor>();
 Object.defineProperty(globalThis, "customElements", {
@@ -34,8 +38,52 @@ function createTestDocument(): Document {
 			}
 
 			const listeners = new Map<string, Array<(event: Event) => void>>();
-			return {
+			const attributes = new Map<string, string>();
+			const children: any[] = [];
+			const createTextNode = (value: string) => ({
+				data: value,
+				nodeType: 3,
+				parentNode: null as any,
+				parentElement: null as any,
+				get textContent() {
+					return value;
+				},
+				set textContent(next: string) {
+					value = next;
+				},
+			});
+			const matches = (node: any, selector: string): boolean => {
+				const trimmed = selector.trim();
+				if (!trimmed) return false;
+				if (trimmed.startsWith('#')) return (node.getAttribute?.('id') ?? node.id) === trimmed.slice(1);
+				if (trimmed.startsWith('.')) {
+					const classAttr = node.getAttribute?.('class') ?? node.className ?? '';
+					return String(classAttr).split(/\s+/).includes(trimmed.slice(1));
+				}
+				return String(node.tagName ?? '').toUpperCase() === trimmed.toUpperCase();
+			};
+			const queryAll = (root: any, selector: string): any[] => {
+				const result: any[] = [];
+				const visit = (node: any): void => {
+					if (matches(node, selector)) {
+						result.push(node);
+					}
+					for (const child of node.childNodes ?? []) {
+						if (child && typeof child === 'object') visit(child);
+					}
+				};
+				for (const child of root.childNodes ?? []) {
+					if (child && typeof child === 'object') visit(child);
+				}
+				return result;
+			};
+			const node: any = {
 				tagName,
+				nodeType: 1,
+				childNodes: children,
+				children,
+				parentNode: null,
+				parentElement: null,
 				addEventListener(type: string, listener: (event: Event) => void) {
 					const current = listeners.get(type) ?? [];
 					current.push(listener);
@@ -47,9 +95,62 @@ function createTestDocument(): Document {
 					}
 					return true;
 				},
-				replaceChildren() {},
-				append() {},
-			} as unknown as HTMLElement;
+				setAttribute(name: string, value: string) {
+					attributes.set(name, value);
+					if (name === 'class') node.className = value;
+					if (name === 'id') node.id = value;
+				},
+				getAttribute(name: string) {
+					return attributes.get(name) ?? null;
+				},
+				removeAttribute(name: string) {
+					attributes.delete(name);
+					if (name === 'class') node.className = '';
+					if (name === 'id') node.id = '';
+				},
+				append(...nodes: any[]) {
+					for (const child of nodes) {
+						if (Array.isArray(child)) {
+							node.append(...child);
+							continue;
+						}
+						const next = typeof child === 'string' ? createTextNode(child) : child;
+						if (next && typeof next === 'object') {
+							next.parentNode = node;
+							next.parentElement = node;
+						}
+						children.push(next);
+					}
+				},
+				replaceChildren(...nodes: any[]) {
+					for (const child of children) {
+						if (child && typeof child === 'object') {
+							child.parentNode = null;
+							child.parentElement = null;
+						}
+					}
+					children.length = 0;
+					node.append(...nodes);
+				},
+				querySelector(selector: string) {
+					return queryAll(node, selector)[0] ?? null;
+				},
+				querySelectorAll(selector: string) {
+					return queryAll(node, selector);
+				},
+				closest(selector: string) {
+					let current: any = node;
+					while (current) {
+						if (matches(current, selector)) return current;
+						current = current.parentElement ?? current.parentNode;
+					}
+					return null;
+				},
+				matches(selector: string) {
+					return matches(node, selector);
+				},
+			};
+			return node as unknown as HTMLElement;
 		},
 	} as Document;
 }
@@ -292,6 +393,7 @@ test("BaseComponent lifecycle decorators run and clean up timers", async () => {
 });
 
 test("Reactive fields can persist across browser restarts", async () => {
+
 	const previousDocument = globalThis.document;
 	const previousStorage = (
 		globalThis as typeof globalThis & {

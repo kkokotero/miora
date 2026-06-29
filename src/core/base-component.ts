@@ -2,6 +2,7 @@ import { createRuntimeContext } from "../core/runtime.ts";
 import {
 	dispatchWatchers,
 	getComponentMetadata,
+	installQueryFields,
 	installTrackedFields,
 } from "../core/metadata.ts";
 import {
@@ -249,6 +250,7 @@ export abstract class BaseComponent {
 				this.requestUpdate();
 			},
 		);
+		installQueryFields(this as Record<string | symbol, unknown>);
 
 		this.#prepared = true;
 	}
@@ -321,6 +323,10 @@ export abstract class BaseComponent {
 
 	protected get isMounted(): boolean {
 		return this.#mounted;
+	}
+
+	protected get hostElement(): HTMLElement | undefined {
+		return this.#host;
 	}
 
 	protected get runtime(): ReturnType<typeof createRuntimeContext> {
