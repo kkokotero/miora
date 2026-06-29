@@ -106,7 +106,6 @@ function validateRequiredInvocationInputs(
 			);
 		}
 	}
-
 }
 
 function applyChildren<TComponent extends BaseComponent>(
