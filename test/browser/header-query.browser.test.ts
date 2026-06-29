@@ -17,14 +17,15 @@ class ThemeProviderComponent extends BaseComponent {
 
 @Component({ selector: "header-component" })
 class HeaderComponent extends BaseComponent {
-	@Query((self) => (self.closest("pamda-theme-provider") as any)?.["pamda-theme"])
+	@Query(
+		(self) => (self.closest("pamda-theme-provider") as any)?.["pamda-theme"],
+	)
 	protected theme!: string;
 
 	protected override render() {
 		return P(JSON.stringify(this.theme));
 	}
 }
-
 
 test("querying the nearest provider theme works in a real browser", async () => {
 	const provider = ThemeProviderComponent.create({
