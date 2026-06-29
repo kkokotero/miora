@@ -11,13 +11,13 @@ import { Text } from "../../src/html/index.ts";
 
 @Component({ selector: "camado-invoke-test" })
 class InvocationTest extends BaseComponent {
-	@Property()
+	@Property({ optional: false })
 	label = "default";
 
-	@Children()
+	@Children({ optional: false })
 	content?: ComponentChildren;
 
-	@Slot("footer")
+	@Slot("footer", { optional: false })
 	footer?: ComponentChildren;
 
 	protected override render() {
@@ -81,6 +81,52 @@ test("Component invocation applies props, children, and slot fields", () => {
 		});
 
 		expect(elementFromFactory.label).toBe("factory");
+	} finally {
+		(globalThis as typeof globalThis & { document: Document }).document =
+			previousDocument as Document;
+	}
+});
+
+
+test("Component invocation throws when required props or projected content are missing", () => {
+	const previousDocument = globalThis.document;
+	(globalThis as typeof globalThis & { document: Document }).document = {
+		createElement(tagName: string) {
+			return {
+				tagName,
+				append() {},
+				replaceChildren() {},
+			} as unknown as HTMLElement;
+		},
+		createDocumentFragment() {
+			return { childNodes: [], append() {}, cloneNode: () => ({ childNodes: [] }) } as unknown as DocumentFragment;
+		},
+		createTextNode(value: string) {
+			return { nodeType: 3, textContent: value } as unknown as Text;
+		},
+	} as unknown as Document;
+
+	try {
+		const invocation = InvocationTest.component();
+
+		expect(() => invocation({} as any)).toThrow(
+			'Camado property "label" is required for camado-invoke-test.',
+		);
+		expect(() =>
+			invocation({ label: "ok" } as any),
+		).toThrow(
+			'Camado slot "footer" is required for camado-invoke-test.',
+		);
+		expect(() =>
+			invocation({ label: "ok", footer: Text("slot") } as any),
+		).toThrow(
+			'Camado children "content" is required for camado-invoke-test.',
+		);
+		expect(() =>
+			invocation({ label: "ok", children: Text("child") } as any),
+		).toThrow(
+			'Camado slot "footer" is required for camado-invoke-test.',
+		);
 	} finally {
 		(globalThis as typeof globalThis & { document: Document }).document =
 			previousDocument as Document;

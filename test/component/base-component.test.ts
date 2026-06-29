@@ -208,8 +208,20 @@ class TestEventInput extends BaseComponent {
 		return null;
 	}
 
-	@Output()
+	@Output({ optional: false })
 	emitSaved() {
+		return { ok: true } as const;
+	}
+}
+
+@Component({ selector: "camado-test-optional-event-input" })
+class TestOptionalEventInput extends BaseComponent {
+	protected override render() {
+		return null;
+	}
+
+	@Output({ optional: true })
+	emitOptional() {
 		return { ok: true } as const;
 	}
 }
@@ -399,6 +411,23 @@ test("@Input passes only the emitted payload to input callbacks", () => {
 
 		expect(result).toEqual({ ok: true });
 		expect(called).toBe(true);
+	} finally {
+		(globalThis as typeof globalThis & { document: Document }).document =
+			previousDocument as Document;
+	}
+});
+
+
+test("Output throws when required callback is missing", () => {
+	const previousDocument = globalThis.document;
+	(globalThis as typeof globalThis & { document: Document }).document =
+		createTestDocument();
+
+	try {
+		expect(() => TestEventInput.create()).toThrow(
+			'Camado output "emitSaved" is required for camado-test-event-input.',
+		);
+		expect(() => TestOptionalEventInput.create()).not.toThrow();
 	} finally {
 		(globalThis as typeof globalThis & { document: Document }).document =
 			previousDocument as Document;

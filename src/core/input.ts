@@ -1,6 +1,6 @@
-import { markEvent } from "./metadata.ts";
+import { markEvent, type EventFieldOptions } from "./metadata.ts";
 
-export function Output(): MethodDecorator {
+export function Output(options: EventFieldOptions = {}): MethodDecorator {
 	return (
 		target: object,
 		key: string | symbol,
@@ -10,7 +10,7 @@ export function Output(): MethodDecorator {
 			return descriptor;
 		}
 
-		markEvent(target, key, String(key));
+		markEvent(target, key, String(key), options);
 
 		const original = descriptor.value as (...args: unknown[]) => unknown;
 		descriptor.value = function (this: unknown, ...args: unknown[]) {

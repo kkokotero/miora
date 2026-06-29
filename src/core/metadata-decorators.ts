@@ -81,15 +81,21 @@ export function markWatch(
 	metadata.watchers.set(sourceKey, watchers);
 }
 
+export interface EventFieldOptions {
+	optional?: boolean;
+}
+
 export function markEvent(
 	target: object,
 	methodKey: ComponentFieldKey,
 	eventName: string,
+	options: EventFieldOptions = {},
 ): void {
-	getOrCreateComponentMetadata(target.constructor as Function).events.set(
-		methodKey,
-		eventName,
-	);
+	const metadata = getOrCreateComponentMetadata(target.constructor as Function);
+	metadata.events.set(methodKey, eventName);
+	if (options.optional) {
+		metadata.eventOptionalKeys.add(methodKey);
+	}
 }
 
 export function markMountHook(

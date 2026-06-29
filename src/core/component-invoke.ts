@@ -32,11 +32,29 @@ export function invokeComponent<TComponent extends BaseComponent>(
 	) as ComponentElement<TComponent>;
 
 	const { children, ...directProps } = options;
+	const childValues = toChildArray(children);
 	const outputCallbacks: Record<string, (detail: unknown) => unknown> = {};
 
+	validateRequiredInvocationInputs(
+		metadata,
+		directProps,
+		childValues,
+		selector || component.name,
+	);
+
 	for (const [key, value] of Object.entries(directProps)) {
-		if (metadata?.events.has(key) && typeof value === "function") {
-			outputCallbacks[key] = value as (detail: unknown) => unknown;
+		if (metadata?.events.has(key)) {
+			if (typeof value === "function") {
+				outputCallbacks[key] = value as (detail: unknown) => unknown;
+				continue;
+			}
+
+			if (metadata.eventRequiredKeys.has(key)) {
+				throw new Error(
+					`Camado output "${key}" is required for ${selector || component.name}.`,
+				);
+			}
+
 			continue;
 		}
 
@@ -45,12 +63,72 @@ export function invokeComponent<TComponent extends BaseComponent>(
 
 	setComponentOutputCallbacks(element, outputCallbacks);
 
-	const childValues = toChildArray(children);
 	if (childValues.length > 0) {
 		applyChildren(element, metadata, childValues);
 	}
 
 	return element;
+}
+
+function validateRequiredInvocationInputs(
+	metadata: ReturnType<typeof getComponentMetadata>,
+	directProps: Record<string, unknown>,
+	childValues: readonly ChildValue[],
+	componentName: string,
+): void {
+	if (!metadata) {
+		return;
+	}
+
+	for (const key of metadata.propertyKeys) {
+		if (typeof key !== "string") {
+			continue;
+		}
+
+		if (
+			!(key in directProps) ||
+			directProps[key] === undefined
+		) {
+			if (metadata.propertyRequiredKeys.has(key)) {
+				throw new Error(
+					`Camado property "${key}" is required for ${componentName}.`,
+				);
+			}
+		}
+	}
+
+	for (const [key, slotName] of metadata.slotKeys) {
+		if (!(key in directProps) || directProps[key as string] === undefined) {
+			if (metadata.slotRequiredKeys.has(key)) {
+				throw new Error(
+					`Camado slot "${slotName}" is required for ${componentName}.`,
+				);
+			}
+		}
+	}
+
+	if (metadata.childrenKeys.size > 0 && childValues.length === 0) {
+		const requiredChild = [...metadata.childrenKeys].find(
+			(key) => metadata.childrenRequiredKeys.has(key),
+		);
+		if (requiredChild !== undefined) {
+			throw new Error(
+				`Camado children "${String(requiredChild)}" is required for ${componentName}.`,
+			);
+		}
+	}
+
+	for (const key of metadata.events.keys()) {
+		if (typeof directProps[String(key)] === "function") {
+			continue;
+		}
+
+		if (metadata.eventRequiredKeys.has(key)) {
+			throw new Error(
+				`Camado output "${String(key)}" is required for ${componentName}.`,
+			);
+		}
+	}
 }
 
 function applyChildren<TComponent extends BaseComponent>(

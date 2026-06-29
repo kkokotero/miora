@@ -362,25 +362,12 @@ function hydrateHostFromLightDom<TComponent extends BaseComponent>(
 		return false;
 	}
 
-	const childNodes = (host as { childNodes?: ArrayLike<Node> | null })
-		.childNodes;
-	const hasChildren = !!childNodes && childNodes.length > 0;
-	const hasAttributes =
-		typeof host.hasAttributes === "function" ? host.hasAttributes() : true;
-
-	if (!hasChildren && !hasAttributes) {
-		return false;
-	}
-
 	let hydrated = false;
-	if (metadata.propertyKeys.size > 0 && hasAttributes) {
+	if (metadata.propertyKeys.size > 0) {
 		hydrated = hydratePropsFromAttributes(host, instance, metadata) || hydrated;
 	}
 
-	if (
-		hasChildren &&
-		(metadata.childrenKeys.size > 0 || metadata.slotKeys.size > 0)
-	) {
+	if (metadata.childrenKeys.size > 0 || metadata.slotKeys.size > 0) {
 		hydrated =
 			hydrateChildrenFromLightDom(host, instance, metadata) || hydrated;
 	}
@@ -401,6 +388,11 @@ function hydratePropsFromAttributes<TComponent extends BaseComponent>(
 
 		const raw = readAttributeForKey(host, key);
 		if (raw === undefined) {
+			if (metadata.propertyRequiredKeys.has(key)) {
+				throw new Error(
+					`Camado property "${key}" is required for ${describeComponent(metadata, instance)}.`,
+				);
+			}
 			continue;
 		}
 
@@ -422,11 +414,7 @@ function hydrateChildrenFromLightDom<TComponent extends BaseComponent>(
 ): boolean {
 	const childNodes = (host as { childNodes?: ArrayLike<Node> | null })
 		.childNodes;
-	if (!childNodes || childNodes.length === 0) {
-		return false;
-	}
-
-	const children = Array.from(childNodes);
+	const children = childNodes ? Array.from(childNodes) : [];
 
 	const slotEntries = [...metadata.slotKeys.entries()];
 	const slotNames = new Set(metadata.slotKeys.values());
@@ -445,9 +433,13 @@ function hydrateChildrenFromLightDom<TComponent extends BaseComponent>(
 		remainingNodes.push(node);
 	}
 
+	const missingRequired: string[] = [];
 	for (const [key, slotName] of slotEntries) {
 		const nodes = slotBuckets.get(slotName);
 		if (!nodes || nodes.length === 0) {
+			if (metadata.slotRequiredKeys.has(key)) {
+				missingRequired.push(`slot "${slotName}"`);
+			}
 			continue;
 		}
 
@@ -458,6 +450,25 @@ function hydrateChildrenFromLightDom<TComponent extends BaseComponent>(
 
 	const childKeys = [...metadata.childrenKeys];
 	if (childKeys.length === 0) {
+		if (missingRequired.length > 0) {
+			throw new Error(
+				`Camado ${missingRequired.join(" and ")} is required for ${describeComponent(metadata, instance)}.`,
+			);
+		}
+		return slotEntries.length > 0;
+	}
+
+	if (remainingNodes.length === 0) {
+		for (const key of childKeys) {
+			if (metadata.childrenRequiredKeys.has(key)) {
+				missingRequired.push(`children "${String(key)}"`);
+			}
+		}
+		if (missingRequired.length > 0) {
+			throw new Error(
+				`Camado ${missingRequired.join(" and ")} is required for ${describeComponent(metadata, instance)}.`,
+			);
+		}
 		return slotEntries.length > 0;
 	}
 
@@ -601,6 +612,13 @@ function coerceHydratedValue(current: unknown, raw: string): unknown {
 	}
 
 	return raw;
+}
+
+function describeComponent(
+	metadata: NonNullable<ReturnType<typeof getComponentMetadata>>,
+	instance: object,
+): string {
+	return metadata.selector ?? (instance.constructor as Function).name;
 }
 
 function getLightDomSlotName(node: Node): string | null {

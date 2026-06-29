@@ -18,14 +18,19 @@ export interface ComponentMetadata {
 	inputKeys: Set<ComponentFieldKey>;
 	propertyKeys: Set<ComponentFieldKey>;
 	propertyOptionalKeys: Set<ComponentFieldKey>;
+	propertyRequiredKeys: Set<ComponentFieldKey>;
 	childrenKeys: Set<ComponentFieldKey>;
 	childrenOptionalKeys: Set<ComponentFieldKey>;
+	childrenRequiredKeys: Set<ComponentFieldKey>;
 	hostKeys: Set<ComponentFieldKey>;
 	queryKeys: Map<ComponentFieldKey, QueryFieldConfig>;
 	slotKeys: Map<ComponentFieldKey, string>;
 	slotOptionalKeys: Set<ComponentFieldKey>;
+	slotRequiredKeys: Set<ComponentFieldKey>;
 	watchers: Map<ComponentFieldKey, Set<ComponentFieldKey>>;
 	events: Map<ComponentFieldKey, string>;
+	eventOptionalKeys: Set<ComponentFieldKey>;
+	eventRequiredKeys: Set<ComponentFieldKey>;
 	binders: Map<ComponentFieldKey, BinderConstructor<any>>;
 	mountHooks: Set<ComponentFieldKey>;
 	destroyHooks: Set<ComponentFieldKey>;
@@ -52,14 +57,19 @@ function createComponentMetadata(): ComponentMetadata {
 		inputKeys: new Set<ComponentFieldKey>(),
 		propertyKeys: new Set<ComponentFieldKey>(),
 		propertyOptionalKeys: new Set<ComponentFieldKey>(),
+		propertyRequiredKeys: new Set<ComponentFieldKey>(),
 		childrenKeys: new Set<ComponentFieldKey>(),
 		childrenOptionalKeys: new Set<ComponentFieldKey>(),
+		childrenRequiredKeys: new Set<ComponentFieldKey>(),
 		hostKeys: new Set<ComponentFieldKey>(),
 		queryKeys: new Map<ComponentFieldKey, QueryFieldConfig>(),
 		slotKeys: new Map<ComponentFieldKey, string>(),
 		slotOptionalKeys: new Set<ComponentFieldKey>(),
+		slotRequiredKeys: new Set<ComponentFieldKey>(),
 		watchers: new Map<ComponentFieldKey, Set<ComponentFieldKey>>(),
 		events: new Map<ComponentFieldKey, string>(),
+		eventOptionalKeys: new Set<ComponentFieldKey>(),
+		eventRequiredKeys: new Set<ComponentFieldKey>(),
 		binders: new Map<ComponentFieldKey, BinderConstructor<any>>(),
 		mountHooks: new Set<ComponentFieldKey>(),
 		destroyHooks: new Set<ComponentFieldKey>(),
@@ -126,8 +136,8 @@ export function markInputField(
 ): void {
 	const metadata = getOrCreateComponentMetadata(target.constructor as Function);
 	metadata.inputKeys.add(key);
-	if (options.optional) {
-		metadata.propertyOptionalKeys.add(key);
+	if (options.optional === false) {
+		metadata.propertyRequiredKeys.add(key);
 	}
 }
 
@@ -142,8 +152,8 @@ export function markPropertyField(
 ): void {
 	const metadata = getOrCreateComponentMetadata(target.constructor as Function);
 	metadata.propertyKeys.add(key);
-	if (options.optional) {
-		metadata.propertyOptionalKeys.add(key);
+	if (options.optional === false) {
+		metadata.propertyRequiredKeys.add(key);
 	}
 }
 
@@ -179,8 +189,8 @@ export function markChildrenField(
 ): void {
 	const metadata = getOrCreateComponentMetadata(target.constructor as Function);
 	metadata.childrenKeys.add(key);
-	if (options.optional) {
-		metadata.childrenOptionalKeys.add(key);
+	if (options.optional === false) {
+		metadata.childrenRequiredKeys.add(key);
 	}
 }
 
@@ -196,8 +206,8 @@ export function markSlotField(
 ): void {
 	const metadata = getOrCreateComponentMetadata(target.constructor as Function);
 	metadata.slotKeys.set(key, name);
-	if (options.optional) {
-		metadata.slotOptionalKeys.add(key);
+	if (options.optional === false) {
+		metadata.slotRequiredKeys.add(key);
 	}
 }
 
@@ -213,15 +223,21 @@ export function markWatch(
 	metadata.watchers.set(sourceKey, watchers);
 }
 
+export interface EventFieldOptions {
+	optional?: boolean;
+}
+
 export function markEvent(
 	target: object,
 	methodKey: ComponentFieldKey,
 	eventName: string,
+	options: EventFieldOptions = {},
 ): void {
-	getOrCreateComponentMetadata(target.constructor as Function).events.set(
-		methodKey,
-		eventName,
-	);
+	const metadata = getOrCreateComponentMetadata(target.constructor as Function);
+	metadata.events.set(methodKey, eventName);
+	if (options.optional === false) {
+		metadata.eventRequiredKeys.add(methodKey);
+	}
 }
 
 export function markBinder(
