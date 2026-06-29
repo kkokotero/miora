@@ -8,8 +8,7 @@ import {
 	OnMount,
 	Output,
 	Property,
-	Query,
-	Queries,
+	Host,
 	getComponentMetadata,
 } from "../../src/core/index.ts";
 import { Event, Reactive, Watch } from "../../src/reactive/index.ts";
@@ -55,12 +54,16 @@ function createTestDocument(): Document {
 			const matches = (node: any, selector: string): boolean => {
 				const trimmed = selector.trim();
 				if (!trimmed) return false;
-				if (trimmed.startsWith('#')) return (node.getAttribute?.('id') ?? node.id) === trimmed.slice(1);
-				if (trimmed.startsWith('.')) {
-					const classAttr = node.getAttribute?.('class') ?? node.className ?? '';
+				if (trimmed.startsWith("#"))
+					return (node.getAttribute?.("id") ?? node.id) === trimmed.slice(1);
+				if (trimmed.startsWith(".")) {
+					const classAttr =
+						node.getAttribute?.("class") ?? node.className ?? "";
 					return String(classAttr).split(/\s+/).includes(trimmed.slice(1));
 				}
-				return String(node.tagName ?? '').toUpperCase() === trimmed.toUpperCase();
+				return (
+					String(node.tagName ?? "").toUpperCase() === trimmed.toUpperCase()
+				);
 			};
 			const queryAll = (root: any, selector: string): any[] => {
 				const result: any[] = [];
@@ -69,11 +72,11 @@ function createTestDocument(): Document {
 						result.push(node);
 					}
 					for (const child of node.childNodes ?? []) {
-						if (child && typeof child === 'object') visit(child);
+						if (child && typeof child === "object") visit(child);
 					}
 				};
 				for (const child of root.childNodes ?? []) {
-					if (child && typeof child === 'object') visit(child);
+					if (child && typeof child === "object") visit(child);
 				}
 				return result;
 			};
@@ -97,16 +100,16 @@ function createTestDocument(): Document {
 				},
 				setAttribute(name: string, value: string) {
 					attributes.set(name, value);
-					if (name === 'class') node.className = value;
-					if (name === 'id') node.id = value;
+					if (name === "class") node.className = value;
+					if (name === "id") node.id = value;
 				},
 				getAttribute(name: string) {
 					return attributes.get(name) ?? null;
 				},
 				removeAttribute(name: string) {
 					attributes.delete(name);
-					if (name === 'class') node.className = '';
-					if (name === 'id') node.id = '';
+					if (name === "class") node.className = "";
+					if (name === "id") node.id = "";
 				},
 				append(...nodes: any[]) {
 					for (const child of nodes) {
@@ -114,8 +117,9 @@ function createTestDocument(): Document {
 							node.append(...child);
 							continue;
 						}
-						const next = typeof child === 'string' ? createTextNode(child) : child;
-						if (next && typeof next === 'object') {
+						const next =
+							typeof child === "string" ? createTextNode(child) : child;
+						if (next && typeof next === "object") {
 							next.parentNode = node;
 							next.parentElement = node;
 						}
@@ -124,7 +128,7 @@ function createTestDocument(): Document {
 				},
 				replaceChildren(...nodes: any[]) {
 					for (const child of children) {
-						if (child && typeof child === 'object') {
+						if (child && typeof child === "object") {
 							child.parentNode = null;
 							child.parentElement = null;
 						}
@@ -275,6 +279,34 @@ class TestLifecycleHooks extends BaseComponent {
 	}
 }
 
+@Component({ selector: "camado-test-host" })
+class TestHostField extends BaseComponent {
+	@Host()
+	host!: HTMLElement | undefined;
+
+	protected override render() {
+		return null;
+	}
+}
+
+test("Host decorates the component field with the custom element host", async () => {
+	const previousDocument = globalThis.document;
+	(globalThis as typeof globalThis & { document: Document }).document =
+		createTestDocument();
+
+	try {
+		const component = TestHostField.create();
+		component.connectedCallback();
+		await Promise.resolve();
+		await Promise.resolve();
+
+		expect(component.host).toBe(component);
+	} finally {
+		(globalThis as typeof globalThis & { document: Document }).document =
+			previousDocument as Document;
+	}
+});
+
 test("Reactive fields register as tracked metadata", () => {
 	const metadata = getComponentMetadata(TestDerivedReactive);
 
@@ -393,7 +425,6 @@ test("BaseComponent lifecycle decorators run and clean up timers", async () => {
 });
 
 test("Reactive fields can persist across browser restarts", async () => {
-
 	const previousDocument = globalThis.document;
 	const previousStorage = (
 		globalThis as typeof globalThis & {

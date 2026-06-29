@@ -311,19 +311,24 @@ mount(document.body, App.component());
 
 #### `@Host`
 
-`@Host()` injects the current component host element into a binder field.
+`@Host()` injects the current component host element into a component field.
 
 Example:
 
 ```ts
-import { BaseBinder, Host } from "camado/core";
+import { BaseComponent, Component, Host } from "camado/core";
 
-class ThemeBinder extends BaseBinder {
+@Component({ selector: "profile-card" })
+class ProfileCard extends BaseComponent {
   @Host()
   host!: HTMLElement;
 
-  readHost() {
-    return this.host;
+  protected override onMount() {
+    this.host.classList.add("ready");
+  }
+
+  protected override render() {
+    return null;
   }
 }
 ```

@@ -163,10 +163,13 @@ export function markQueryField(
 	selector: QueryFieldSelector,
 	multiple = false,
 ): void {
-	getOrCreateComponentMetadata(target.constructor as Function).queryKeys.set(key, {
-		selector,
-		multiple,
-	});
+	getOrCreateComponentMetadata(target.constructor as Function).queryKeys.set(
+		key,
+		{
+			selector,
+			multiple,
+		},
+	);
 }
 
 export function markChildrenField(
@@ -355,6 +358,26 @@ export function installTrackedFields(
 	}
 }
 
+export function installHostFields(
+	instance: Record<string | symbol, unknown>,
+): void {
+	const metadata = getComponentMetadata(instance.constructor as Function);
+	if (!metadata || metadata.hostKeys.size === 0) {
+		return;
+	}
+
+	for (const key of metadata.hostKeys) {
+		Reflect.deleteProperty(instance, key);
+		Object.defineProperty(instance, key, {
+			configurable: true,
+			enumerable: true,
+			get() {
+				return (instance as { hostElement?: HTMLElement }).hostElement;
+			},
+		});
+	}
+}
+
 export function installQueryFields(
 	instance: Record<string | symbol, unknown>,
 ): void {
@@ -379,8 +402,8 @@ export function installQueryFields(
 					const result = config.selector(host);
 					return config.multiple
 						? Array.from(
-							(result ?? []) as ArrayLike<unknown> | Iterable<unknown>,
-						)
+								(result ?? []) as ArrayLike<unknown> | Iterable<unknown>,
+							)
 						: (result ?? null);
 				}
 
@@ -494,7 +517,9 @@ function matchesSelector(value: unknown, selector: string): boolean {
 		);
 		if (typeof getAttribute === "function") {
 			const raw = getAttribute.call(value, "class");
-			return typeof raw === "string" && raw.split(/\s+/).includes(trimmed.slice(1));
+			return (
+				typeof raw === "string" && raw.split(/\s+/).includes(trimmed.slice(1))
+			);
 		}
 
 		const className = Reflect.get(
@@ -511,7 +536,10 @@ function matchesSelector(value: unknown, selector: string): boolean {
 		value as unknown as Record<string | symbol, unknown>,
 		"tagName",
 	);
-	return typeof tagName === "string" && tagName.toUpperCase() === trimmed.toUpperCase();
+	return (
+		typeof tagName === "string" &&
+		tagName.toUpperCase() === trimmed.toUpperCase()
+	);
 }
 
 export function dispatchWatchers(

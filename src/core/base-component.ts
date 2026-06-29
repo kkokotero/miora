@@ -2,6 +2,7 @@ import { createRuntimeContext } from "../core/runtime.ts";
 import {
 	dispatchWatchers,
 	getComponentMetadata,
+	installHostFields,
 	installQueryFields,
 	installTrackedFields,
 } from "../core/metadata.ts";
@@ -250,6 +251,7 @@ export abstract class BaseComponent {
 				this.requestUpdate();
 			},
 		);
+		installHostFields(this as Record<string | symbol, unknown>);
 		installQueryFields(this as Record<string | symbol, unknown>);
 
 		this.#prepared = true;
