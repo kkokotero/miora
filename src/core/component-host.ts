@@ -685,8 +685,11 @@ export function defineComponentHost<TComponent extends BaseComponent>(
 							return;
 						}
 
-						instance[key as keyof TComponent] =
-							next as TComponent[keyof TComponent];
+						Reflect.set(
+							instance as Record<string | symbol, unknown>,
+							key,
+							next,
+						);
 					},
 				});
 			}
