@@ -7,10 +7,10 @@ import { getComponentMetadata } from "./metadata.ts";
 import type { BaseComponent } from "./base-component.ts";
 import type { ComponentConstructor } from "./component-types.ts";
 
-const componentInstanceSymbol = Symbol("camado.componentInstance");
-const componentHostKeysSymbol = Symbol("camado.componentHostKeys");
-const componentHydratedSymbol = Symbol("camado.componentHydrated");
-const componentProjectedSymbol = Symbol("camado.componentProjected");
+const componentInstanceSymbol = Symbol.for("camado.componentInstance");
+const componentHostKeysSymbol = Symbol.for("camado.componentHostKeys");
+const componentHydratedSymbol = Symbol.for("camado.componentHydrated");
+const componentProjectedSymbol = Symbol.for("camado.componentProjected");
 
 export function isComponentHostElement(
 	value: unknown,
@@ -443,9 +443,11 @@ function hydrateChildrenFromLightDom<TComponent extends BaseComponent>(
 			continue;
 		}
 
-		defineFragmentBackedField(instance, key, createFragment(...nodes), () =>
-			instance.__requestUpdate(),
-		);
+		if (!hasFragmentBackedField(instance, key)) {
+			defineFragmentBackedField(instance, key, createFragment(...nodes), () =>
+				instance.__requestUpdate(),
+			);
+		}
 	}
 
 	const childKeys = [...metadata.childrenKeys];
@@ -474,6 +476,9 @@ function hydrateChildrenFromLightDom<TComponent extends BaseComponent>(
 
 	const fragment = createFragment(...remainingNodes);
 	for (const key of childKeys) {
+		if (hasFragmentBackedField(instance, key)) {
+			continue;
+		}
 		defineFragmentBackedField(instance, key, fragment, () =>
 			instance.__requestUpdate(),
 		);
@@ -507,6 +512,18 @@ export function defineFragmentBackedField<TComponent extends BaseComponent>(
 	});
 }
 
+function hasFragmentBackedField(
+	instance: object,
+	key: string | symbol,
+): boolean {
+	const descriptor = Object.getOwnPropertyDescriptor(instance, key);
+	return Boolean(
+		descriptor &&
+			typeof descriptor.get === "function" &&
+			typeof descriptor.set === "function",
+	);
+}
+
 function collectFragmentBackingValues(
 	value: unknown,
 	result: ChildValue[] = [],
@@ -534,27 +551,64 @@ function collectFragmentBackingValues(
 }
 
 function cloneChildValue(value: ChildValue): ChildValue {
+	if (isComponentHostElement(value)) {
+		return value;
+	}
+
 	if (Array.isArray(value)) {
 		return value.map((entry) => cloneChildValue(entry));
 	}
 
+	if (isFragmentNode(value)) {
+		const fragment = document.createDocumentFragment();
+		for (let index = 0; index < value.childNodes.length; index += 1) {
+			appendChildValue(fragment, cloneChildValue(value.childNodes[index]));
+		}
+		return fragment;
+	}
+
 	if (isNodeValue(value)) {
-		return cloneNodeLike(value);
+		if (isPreservedCustomElement(value)) {
+			return value;
+		}
+
+		if (value.nodeType === 3) {
+			return document.createTextNode(value.textContent ?? "");
+		}
+
+		if (typeof value.cloneNode === "function") {
+			return value.cloneNode(true);
+		}
 	}
 
 	return value;
 }
 
-function cloneNodeLike(node: Node): Node {
-	if (typeof node.cloneNode === "function") {
-		return node.cloneNode(true);
+function isPreservedCustomElement(node: Node): boolean {
+	if (node.nodeType !== 1) {
+		return false;
 	}
 
-	if (node.nodeType === 3) {
-		return document.createTextNode(node.textContent ?? "");
+	if (!isComponentHostElement(node)) {
+		if (typeof customElements === "undefined") {
+			return false;
+		}
+
+		return (
+			customElements.get((node as Element).tagName.toLowerCase()) !== undefined
+		);
 	}
 
-	return node;
+	const instance = Reflect.get(
+		node as unknown as Record<string | symbol, unknown>,
+		componentInstanceSymbol,
+	) as BaseComponent | undefined;
+	const hostElement = Reflect.get(
+		instance as unknown as object,
+		"hostElement",
+	) as HTMLElement | undefined;
+
+	return hostElement === node;
 }
 
 function isFragmentNode(value: unknown): value is DocumentFragment {
